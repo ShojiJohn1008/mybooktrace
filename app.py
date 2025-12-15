@@ -4,9 +4,11 @@ import requests
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'dev-secret-change-me'
+# Use SECRET_KEY from environment when provided
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-secret-change-me')
 
-DB_PATH = os.path.join(os.path.dirname(__file__), 'kashidashi1215.db')
+# Allow DB path to be configured via env var for hosting (default: bundled sqlite file)
+DB_PATH = os.environ.get('DATABASE_PATH', os.path.join(os.path.dirname(__file__), 'kashidashi1215.db'))
 
 
 def get_db_connection():
