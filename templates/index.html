@@ -1,0 +1,116 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+  <section id="scanner" class="scanner bg-white shadow rounded-lg border border-gray-200 p-4 mb-6 card-fallback">
+    <h2 class="text-lg font-medium mb-2">カメラでISBNをスキャン</h2>
+    <div class="mb-3">
+      <video id="scanner-video" playsinline autoplay muted class="w-full h-auto bg-black rounded-md" style="max-height:320px;"></video>
+    </div>
+    <div class="flex gap-3 mb-3">
+      <button type="button" id="scan-start" class="bg-blue-600 text-white px-4 py-2 rounded shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400">カメラでスキャン開始</button>
+      <button type="button" id="scan-stop" disabled class="bg-gray-200 text-gray-700 px-4 py-2 rounded shadow-sm hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-300">停止</button>
+      <button type="button" id="paste-isbn" class="bg-indigo-600 text-white px-4 py-2 rounded shadow hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-400">クリップボード貼り付け</button>
+    </div>
+    <div class="mb-2">
+      <label class="block text-sm text-gray-700">検出結果</label>
+      <div id="scanned_result" class="mt-1 text-base font-medium text-gray-900">—</div>
+    </div>
+    <p class="text-sm text-gray-500">注: ブラウザの BarcodeDetector 非対応時は、ScanApp でスキャン→クリップボードにコピー→貼り付けを使ってください。</p>
+  </section>
+  <section class="isbn-register bg-white shadow rounded-lg border border-gray-200 p-4 mb-6 card-fallback">
+    <h2 class="text-lg font-medium mb-2">書籍をISBNで登録</h2>
+    <form method="post" action="/add_book" class="space-y-3">
+      <div>
+        <label class="block text-sm text-gray-700">ISBN</label>
+        <input class="mt-1 block w-full border-gray-200 rounded-md shadow-sm" type="text" name="isbn_new" placeholder="例: 9784094078263" required>
+      </div>
+      <div>
+        <button class="inline-block bg-blue-600 text-white px-4 py-2 rounded shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400" type="submit">ISBNから取得して登録</button>
+      </div>
+    </form>
+  </section>
+
+  <section class="user-register bg-white shadow rounded-lg border border-gray-200 p-4 mb-6 card-fallback">
+    <h2 class="text-lg font-medium mb-2">ユーザーを追加</h2>
+    <form method="post" action="/add_user" class="space-y-3">
+      <div>
+        <label class="block text-sm text-gray-700">ユーザー名</label>
+        <input class="mt-1 block w-full border-gray-200 rounded-md shadow-sm" type="text" name="user_name_new" placeholder="氏名を入力" required>
+      </div>
+      <div>
+        <button class="inline-block bg-green-600 text-white px-4 py-2 rounded shadow hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-400" type="submit">ユーザーを追加</button>
+      </div>
+    </form>
+  </section>
+
+
+  <form method="post" action="/submit" class="bg-white shadow rounded-lg border border-gray-200 p-4 mb-6 space-y-4 card-fallback">
+    <div>
+      <label class="block text-sm text-gray-700">ユーザー</label>
+      <select class="mt-1 block w-full border-gray-200 rounded-md" name="user_id" required>
+        <option value="">選択してください</option>
+        {% for u in users %}
+          <option value="{{ u.user_id }}">{{ u.name }} (ID: {{ u.user_id }})</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div>
+      <label class="block text-sm text-gray-700">書籍</label>
+      <select class="mt-1 block w-full border-gray-200 rounded-md" name="isbn" required>
+        <option value="">選択してください</option>
+        {% for b in books %}
+          <option value="{{ b.isbn }}">{{ b.title }} — {{ b.isbn }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div>
+      <label class="block text-sm text-gray-700">アクション</label>
+      <select class="mt-1 block w-full border-gray-200 rounded-md" name="action_id" required>
+        <option value="">選択してください</option>
+        {% for a in actions %}
+          <option value="{{ a.action_id }}">{{ a.action_name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div>
+      <label class="block text-sm text-gray-700">日時 (省略可: 今の時間が使われます)</label>
+      <input class="mt-1 block w-full border-gray-200 rounded-md" type="datetime-local" name="logged_at" id="logged_at">
+    </div>
+
+      <div>
+      <button class="bg-indigo-600 text-white px-4 py-2 rounded shadow hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-400" type="submit">記録を追加</button>
+    </div>
+  </form>
+
+  <h2 class="text-lg font-medium mb-3">最近のログ</h2>
+  <div class="overflow-x-auto">
+    <table class="min-w-full bg-white rounded-md shadow-sm">
+      <thead class="bg-gray-50 text-sm text-gray-700">
+        <tr>
+          <th class="px-4 py-2 text-left">ID</th>
+          <th class="px-4 py-2 text-left">日時</th>
+          <th class="px-4 py-2 text-left">ユーザー</th>
+          <th class="px-4 py-2 text-left">書籍</th>
+          <th class="px-4 py-2 text-left">アクション</th>
+        </tr>
+      </thead>
+      <tbody class="text-sm">
+        {% for l in logs %}
+          <tr class="border-t">
+            <td class="px-4 py-2">{{ l.loan_id }}</td>
+            <td class="px-4 py-2">{{ l.logged_at }}</td>
+            <td class="px-4 py-2">{{ l.user_name or '—' }}</td>
+            <td class="px-4 py-2">{{ l.book_title or l.isbn }}</td>
+            <td class="px-4 py-2">{{ l.action_name }}</td>
+          </tr>
+        {% else %}
+          <tr><td colspan="5" class="px-4 py-4">まだログがありません。</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+{% endblock %}

@@ -1,0 +1,38 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+  <div class="max-w-2xl mx-auto">
+    <section class="bg-white rounded-lg border border-gray-200 shadow p-4 mb-4">
+      <h2 class="text-lg font-medium mb-2">{{ what_label }} — ISBN: {{ isbn }}</h2>
+      <p class="text-sm text-gray-600 mb-3">{{ book_title or 'タイトル情報が見つかりません' }}</p>
+
+      <form method="post" action="/do/{{ what }}" class="space-y-3">
+        <input type="hidden" name="isbn" value="{{ isbn }}">
+        <div>
+          <label class="block text-sm text-gray-700">ユーザー</label>
+          <select name="user_id" class="mt-1 block w-full border-gray-200 rounded-md" required>
+            <option value="">選択してください</option>
+            {% for u in users %}
+              <option value="{{ u.user_id }}">{{ u.name }} (ID: {{ u.user_id }})</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div>
+          <button class="bg-blue-600 text-white px-4 py-2 rounded shadow hover:bg-blue-700" type="submit">{{ what_button }}</button>
+        </div>
+      </form>
+    </section>
+
+    <section class="bg-white rounded-lg border border-gray-200 shadow p-3">
+      <h3 class="text-sm font-medium mb-2">共有用QRコード</h3>
+      <div class="mb-2">
+        <img src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data={{ share_url|urlencode }}" alt="QR code">
+      </div>
+      <div class="text-sm text-gray-600">このQRをチームと共有してください。スキャンするとこの画面が開きます。</div>
+      <div class="mt-2">
+        <input type="text" readonly value="{{ share_url }}" class="w-full border-gray-200 rounded-md p-2" onclick="this.select()">
+      </div>
+    </section>
+  </div>
+{% endblock %}

@@ -1,0 +1,30 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+  <h2 class="text-lg font-medium mb-3">貸出中の書籍一覧</h2>
+  <div class="overflow-x-auto card-fallback">
+    <table class="min-w-full bg-white rounded-md shadow">
+      <thead class="bg-gray-50 text-sm text-gray-700">
+        <tr>
+          <th class="px-4 py-2 text-left">ISBN</th>
+          <th class="px-4 py-2 text-left">書名</th>
+          <th class="px-4 py-2 text-left">貸出日</th>
+          <th class="px-4 py-2 text-left">貸出者</th>
+        </tr>
+      </thead>
+      <tbody class="text-sm">
+        {% for r in rows %}
+          <tr class="border-t">
+            <td class="px-4 py-2">{{ r.isbn }}</td>
+            <td class="px-4 py-2">{{ r.book_title or '（タイトル不明）' }}</td>
+            <td class="px-4 py-2">{{ r.logged_at }}</td>
+            <td class="px-4 py-2">{{ r.user_name or '（不明）' }}</td>
+          </tr>
+        {% else %}
+          <tr><td colspan="4" class="px-4 py-4">現在貸出中の書籍はありません。</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+{% endblock %}
